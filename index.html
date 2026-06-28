@@ -61,7 +61,9 @@
     .splash-bottom {
       position: absolute;
       left: 0; right: 0;
-      height: 50vh;
+      /* 50% of #splash (position:fixed; inset:0) = exact half of visible viewport
+         This is the correct fix for iOS Safari where 50vh ≠ 50% of visible area */
+      height: 50%;
       overflow: hidden;
       background: #fff;
       will-change: transform;
@@ -71,34 +73,34 @@
 
     /*
      * TRICK: both <img> copies are positioned as if they are ONE centered
-     * image in the full 100vh viewport.
+     * image in the full visible viewport.
      *
-     * Logo size: --logo = 52vmin  →  half = 26vmin
+     * Logo size: 72vmin  →  half = 36vmin
      *
-     * Top-half container starts at 0.
-     *   img.top property = 50vh - 26vmin   (center of screen minus half logo)
-     *   overflow:hidden clips everything below 50vh → shows top half of logo ✓
+     * Top-half: img.top = 50% (of #splash) - 36vmin
+     *   → 50% here means 50% of the fixed container = exact visual center
+     *   overflow:hidden clips below container bottom → shows top half ✓
      *
-     * Bottom-half container starts at 50vh.
-     *   Same absolute position but relative to THIS container:
-     *   img.top = (50vh - 26vmin) - 50vh = -26vmin
-     *   overflow:hidden clips everything above 0 → shows bottom half of logo ✓
+     * Bottom-half: img.top = -36vmin (relative to this container's top edge)
+     *   → container top is at visual center, so image starts at center-36vmin
+     *   overflow:hidden clips above container top → shows bottom half ✓
      */
     .splash-top .splash-img {
       position: absolute;
-      width: 76vmin; height: 76vmin;
+      width: 72vmin; height: 72vmin;
       left: 50%; transform: translateX(-50%);
       object-fit: contain;
-      top: calc(50vh - 38vmin);
+      /* 100% of .splash-top = 50% of viewport = visual center of screen */
+      top: calc(100% - 36vmin);
       opacity: 0;
       animation: splashFadeIn 0.9s var(--ease) 0.2s forwards;
     }
     .splash-bottom .splash-img {
       position: absolute;
-      width: 76vmin; height: 76vmin;
+      width: 72vmin; height: 72vmin;
       left: 50%; transform: translateX(-50%);
       object-fit: contain;
-      top: calc(-38vmin);
+      top: calc(-36vmin);
       opacity: 0;
       animation: splashFadeIn 0.9s var(--ease) 0.2s forwards;
     }
@@ -110,8 +112,7 @@
     /* Brand name — in the TOP half, just above the logo */
     .splash-brand {
       position: absolute;
-      /* push it up from the split line by logo-half + a gap */
-      bottom: calc(38vmin + 22px);
+      bottom: calc(36vmin + 20px);
       left: 50%;
       transform: translateX(-50%);
       text-align: center;
@@ -1269,41 +1270,120 @@
     }
 
     /* ===== RESPONSIVE ===== */
+
+    /* ── Tablet landscape ── */
+    @media (max-width: 1100px) {
+      nav { padding: 20px 40px; }
+      nav.scrolled { padding: 14px 40px; }
+      .footer-inner { grid-template-columns: 1.5fr 1fr 1fr; }
+    }
+
+    /* ── Tablet portrait ── */
     @media (max-width: 1024px) {
       nav { padding: 20px 32px; }
       nav.scrolled { padding: 14px 32px; }
       .nav-links { gap: 24px; }
       .nav-cta { display: none; }
-      #despre { grid-template-columns: 1fr; gap: 60px; padding: 100px 32px; }
+
+      #despre { grid-template-columns: 1fr; gap: 60px; padding: 100px 40px; }
+      .about-img-wrap { max-width: 520px; }
       .about-img-accent { display: none; }
+
+      #servicii { padding: 100px 40px; }
       .services-grid { grid-template-columns: 1fr; }
-      .service-card { aspect-ratio: 16/7; }
-      #portofoliu { padding: 100px 32px; }
-      .video-grid { grid-template-columns: 1fr; }
+      .service-card { aspect-ratio: 21/9; }
+      /* Show desc text always on touch devices */
+      .service-card-content { transform: translateY(0); }
+      .service-desc { opacity: 1; transform: translateY(0); }
+
+      #portofoliu { padding: 100px 40px; }
+      .video-grid { grid-template-columns: repeat(2, 1fr); }
       .photo-grid { grid-template-columns: repeat(2, 1fr); }
       .photo-grid-item.tall { grid-row: span 1; }
-      .packages-grid { grid-template-columns: 1fr; }
+
+      #oferte { padding: 100px 40px; }
+      .packages-grid { grid-template-columns: 1fr; max-width: 520px; margin: 0 auto; }
+
+      #testimoniale { padding: 100px 40px; }
       .testimonials-grid { grid-template-columns: 1fr; }
+
+      #contact { padding: 100px 40px; }
       .contact-inner { grid-template-columns: 1fr; gap: 60px; }
-      #contact { padding: 100px 32px; }
-      #oferte { padding: 100px 32px; }
-      #testimoniale { padding: 100px 32px; }
-      #servicii { padding: 100px 32px; }
-      footer { padding: 60px 32px; }
+
+      footer { padding: 60px 40px; }
       .footer-inner { grid-template-columns: 1fr 1fr; gap: 40px; }
     }
 
+    /* ── Mobile ── */
     @media (max-width: 768px) {
-      nav { padding: 18px 24px; }
-      nav.scrolled { padding: 14px 24px; }
+      /* Nav */
+      nav { padding: 16px 20px; }
+      nav.scrolled { padding: 12px 20px; }
       .nav-links { display: none; }
       .hamburger { display: flex; }
-      .hero-title { font-size: clamp(40px, 10vw, 72px); }
-      #describe { padding: 80px 24px; }
-      .about-stats { grid-template-columns: repeat(3, 1fr); }
+
+      /* Hero */
+      #home { height: 185vh; }
+      .hero-title { font-size: clamp(36px, 11vw, 62px); line-height: 1.1; }
+      .hero-sub { font-size: 14px; max-width: 340px; margin-bottom: 36px; }
+      .hero-actions { gap: 12px; }
+      .btn-primary, .btn-outline { padding: 14px 28px; font-size: 11px; letter-spacing: 0.14em; }
+
+      /* About */
+      #despre { padding: 80px 20px; gap: 48px; grid-template-columns: 1fr; }
+      .about-text h2 { font-size: clamp(30px, 8vw, 46px); }
+      .about-stats { gap: 20px; padding-top: 36px; margin-top: 36px; }
+      .stat-num { font-size: 38px; }
+      .stat-label { font-size: 11px; }
+
+      /* Services */
+      #servicii { padding: 80px 20px; }
+      .services-header { margin-bottom: 48px; }
+      .service-card { aspect-ratio: 3/2; }
+
+      /* Portfolio */
+      #portofoliu { padding: 80px 20px; }
+      .portfolio-header { margin-bottom: 48px; }
+      .video-grid { grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px; }
+      .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 3px; margin-top: 16px; }
+      .photo-grid-item { min-height: 150px; }
+
+      /* Packages */
+      #oferte { padding: 80px 20px; }
+      .oferte-header { margin-bottom: 48px; }
+      .packages-grid { max-width: 100%; }
+      .package-card { padding: 36px 24px; }
+      .package-name { font-size: 26px; }
+      .package-price { font-size: 38px; }
+
+      /* Testimonials */
+      #testimoniale { padding: 80px 20px; }
+      #testimoniale h2 { margin-bottom: 48px; }
+
+      /* Contact */
+      #contact { padding: 80px 20px; }
+      .contact-inner { gap: 48px; }
       .form-row { grid-template-columns: 1fr; }
-      .footer-inner { grid-template-columns: 1fr; gap: 36px; }
-      .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+
+      /* Banner */
+      .banner-section { height: 340px; }
+
+      /* Footer */
+      footer { padding: 48px 20px; }
+      .footer-inner { grid-template-columns: 1fr; gap: 32px; padding-bottom: 36px; }
+      .footer-bottom { flex-direction: column; gap: 10px; text-align: center; }
+      .footer-brand p { max-width: 100%; }
+    }
+
+    /* ── Small phones (≤ 400px) ── */
+    @media (max-width: 400px) {
+      .splash-brand-name { font-size: clamp(22px, 6.5vmin, 34px); }
+      .hero-title { font-size: clamp(32px, 10vw, 48px); }
+      .hero-sub { font-size: 13px; }
+      .about-stats { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      .stat-num { font-size: 32px; }
+      .testimonial { padding: 28px 20px; }
+      .contact-icon { width: 36px; height: 36px; }
     }
   </style>
 </head>
@@ -1799,7 +1879,15 @@
 
       let progress = 0;
       let done     = false;
-      const THRESHOLD = 400;
+      const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      const THRESHOLD = isMobile ? 160 : 400;
+
+      // On mobile: auto-open after 3.2s if user doesn't interact
+      if (isMobile) {
+        setTimeout(() => {
+          if (!done) { progress = THRESHOLD; applyProgress(); finish(); }
+        }, 3200);
+      }
 
       // Smooth ease: starts slow, accelerates
       function easeInQuad(t) { return t * t; }
